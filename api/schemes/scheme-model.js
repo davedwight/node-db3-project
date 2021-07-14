@@ -19,23 +19,46 @@ async function find() {
     Return from this function the resulting dataset.
   */
   const schemes = await db("schemes as sc")
-    .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
-    .select('sc.*')
-    .count({number_of_steps: 'st.step_id'})
-    .groupBy('sc.scheme_id')
-    .orderBy('sc.scheme_id');
+    .leftJoin("steps as st", "sc.scheme_id", "st.scheme_id")
+    .select("sc.*")
+    .count({ number_of_steps: "st.step_id" })
+    .groupBy("sc.scheme_id")
+    .orderBy("sc.scheme_id");
 
   return schemes;
 }
 
 async function findById(scheme_id) {
-  const scheme = await db("schemes as sc")
-    .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
-    .select('sc.scheme_name', 'st.step_id', 'st.step_number', 'st.instructions', 'sc.scheme_id')
-    .where('sc.scheme_id', scheme_id)
-    .orderBy('st.step_number');
+  const flatResult = await db("schemes as sc")
+    .leftJoin("steps as st", "sc.scheme_id", "st.scheme_id")
+    .select(
+      "sc.scheme_name",
+      "st.step_id",
+      "st.step_number",
+      "st.instructions",
+      "sc.scheme_id"
+    )
+    .where("sc.scheme_id", scheme_id)
+    .orderBy("st.step_number");
 
-  return scheme;
+  const shapedResult = flatResult.reduce((acc, value) => {
+    acc.push({
+      scheme_id: value.scheme_id,
+      scheme_name: value.scheme_name,
+      steps: [
+        {
+          step_id: value.step_id,
+          step_number: value.step_number,
+          instructions: value.instructions,
+        },
+      ],
+    });
+    return acc;
+  }, []);
+
+  console.log(shapedResult);
+  return shapedResult;
+
   // EXERCISE B
   /*
     1B- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`:
