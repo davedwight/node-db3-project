@@ -10,8 +10,8 @@ const Scheme = require("./scheme-model");
 */
 const checkSchemeId = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const scheme = await Scheme.getById(id);
+    const { scheme_id } = req.params;
+    const scheme = await Scheme.findById(scheme_id);
     if (scheme) {
       req.scheme = scheme;
       next();
