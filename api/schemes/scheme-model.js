@@ -185,7 +185,15 @@ async function add(scheme) {
   */
 }
 
-function addStep(scheme_id, step) {
+async function addStep(scheme_id, step) {
+  await db('steps').insert({ 
+    scheme_id: scheme_id, 
+    step_number: step.step_number,
+    instructions: step.instructions,
+  });
+  const schemeSteps = await findSteps(scheme_id);
+  return schemeSteps;
+  
   // EXERCISE E
   /*
     1E- This function adds a step to the scheme with the given `scheme_id`
