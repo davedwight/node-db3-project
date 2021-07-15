@@ -147,8 +147,11 @@ async function findSteps(scheme_id) {
     .where("sc.scheme_id", scheme_id)
     .orderBy("st.step_number");
 
-    console.log(flatResult);
-
+    if (flatResult[0].step_id) {
+      return flatResult;
+    } else {
+      return [];
+    }
   // EXERCISE C
   /*
     1C- Build a query in Knex that returns the following data.
