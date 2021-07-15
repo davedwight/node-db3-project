@@ -36,7 +36,7 @@ const checkSchemeId = async (req, res, next) => {
 const validateScheme = (req, res, next) => {
   const { scheme_name } = req.body;
   const dataType = typeof scheme_name;
-  const trimmed = (dataType === 'string' ? scheme_name.trim() : scheme_name);
+  const trimmed = dataType === "string" ? scheme_name.trim() : scheme_name;
 
   if (!scheme_name || trimmed.length < 1 || dataType !== "string") {
     next({
@@ -57,7 +57,27 @@ const validateScheme = (req, res, next) => {
     "message": "invalid step"
   }
 */
-const validateStep = (req, res, next) => {};
+const validateStep = (req, res, next) => {
+  const { instructions, step_number } = req.body;
+  const instructType = typeof instructions;
+  const trimmed =
+    instructType === "string" ? instructions.trim() : instructions;
+
+  if (
+    !instructions ||
+    trimmed.length < 1 ||
+    instructType !== "string" ||
+    isNaN(step_number) ||
+    step_number < 1
+  ) {
+    next({
+      status: 400,
+      message: "invalid step",
+    });
+  } else {
+    next();
+  }
+};
 
 module.exports = {
   checkSchemeId,
