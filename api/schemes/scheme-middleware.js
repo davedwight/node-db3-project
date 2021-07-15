@@ -11,14 +11,15 @@ const Scheme = require("./scheme-model");
 const checkSchemeId = async (req, res, next) => {
   try {
     const { scheme_id } = req.params;
-    const scheme = await Scheme.findById(scheme_id);
-    if (scheme) {
-      next();
-    } else {
+    const schemeRes = await Scheme.findById(scheme_id);
+    console.log(schemeRes);
+    if (!schemeRes || schemeRes === undefined) {
       next({
         status: 404,
         message: `scheme with scheme_id ${scheme_id} not found`,
       });
+    } else {
+      next();
     }
   } catch (err) {
     next(err);

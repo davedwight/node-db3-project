@@ -41,13 +41,18 @@ async function findById(scheme_id) {
     .where("sc.scheme_id", scheme_id)
     .orderBy("st.step_number");
 
-  const resStub = {
-    scheme_id: flatResult[0].scheme_id,
-    scheme_name: flatResult[0].scheme_name,
-    steps: [],
-  };
+  const resStub =
+    flatResult.length === 0
+      ? undefined
+      : {
+          scheme_id: flatResult[0].scheme_id,
+          scheme_name: flatResult[0].scheme_name,
+          steps: [],
+        };
 
-  if (flatResult[0].step_id) {
+  if (flatResult.length === 0) {
+    return undefined;
+  } else if (flatResult[0].step_id) {
     const steps = flatResult.reduce((acc, value) => {
       acc.push({
         step_id: value.step_id,
@@ -138,20 +143,15 @@ async function findById(scheme_id) {
 async function findSteps(scheme_id) {
   const flatResult = await db("schemes as sc")
     .leftJoin("steps as st", "sc.scheme_id", "st.scheme_id")
-    .select(
-      "st.step_id",
-      "st.step_number",
-      "st.instructions",
-      "sc.scheme_name"
-    )
+    .select("st.step_id", "st.step_number", "st.instructions", "sc.scheme_name")
     .where("sc.scheme_id", scheme_id)
     .orderBy("st.step_number");
 
-    if (flatResult[0].step_id) {
-      return flatResult;
-    } else {
-      return [];
-    }
+  if (flatResult[0].step_id) {
+    return flatResult;
+  } else {
+    return [];
+  }
   // EXERCISE C
   /*
     1C- Build a query in Knex that returns the following data.
@@ -176,9 +176,9 @@ async function findSteps(scheme_id) {
 }
 
 async function add(scheme) {
-  const [id] = await db('schemes').insert(scheme);
+  const [id] = await db("schemes").insert(scheme);
   const newScheme = await findById(id);
-  return(newScheme);
+  return newScheme;
   // EXERCISE D
   /*
     1D- This function creates a new scheme and resolves to _the newly created scheme_.
@@ -186,14 +186,14 @@ async function add(scheme) {
 }
 
 async function addStep(scheme_id, step) {
-  await db('steps').insert({ 
-    scheme_id: scheme_id, 
+  await db("steps").insert({
+    scheme_id: scheme_id,
     step_number: step.step_number,
     instructions: step.instructions,
   });
   const schemeSteps = await findSteps(scheme_id);
   return schemeSteps;
-  
+
   // EXERCISE E
   /*
     1E- This function adds a step to the scheme with the given `scheme_id`
