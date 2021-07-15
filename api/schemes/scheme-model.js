@@ -41,23 +41,31 @@ async function findById(scheme_id) {
     .where("sc.scheme_id", scheme_id)
     .orderBy("st.step_number");
 
-  const shapedResult = flatResult.reduce((acc, value) => {
-    acc.push({
-      scheme_id: value.scheme_id,
-      scheme_name: value.scheme_name,
-      steps: [
-        {
-          step_id: value.step_id,
-          step_number: value.step_number,
-          instructions: value.instructions,
-        },
-      ],
-    });
-    return acc;
-  }, []);
+  const resStub = {
+    scheme_id: flatResult[0].scheme_id,
+    scheme_name: flatResult[0].scheme_name,
+    steps: [],
+  };
 
-  console.log(shapedResult);
-  return shapedResult;
+  if (flatResult[0].step_id) {
+    const steps = flatResult.reduce((acc, value) => {
+      acc.push({
+        step_id: value.step_id,
+        step_number: value.step_number,
+        instructions: value.instructions,
+      });
+      return acc;
+    }, []);
+
+    const resShaped = {
+      ...resStub,
+      steps: steps,
+    };
+
+    return resShaped;
+  } else {
+    return resStub;
+  }
 
   // EXERCISE B
   /*
@@ -127,7 +135,20 @@ async function findById(scheme_id) {
   */
 }
 
-function findSteps(scheme_id) {
+async function findSteps(scheme_id) {
+  const flatResult = await db("schemes as sc")
+    .leftJoin("steps as st", "sc.scheme_id", "st.scheme_id")
+    .select(
+      "st.step_id",
+      "st.step_number",
+      "st.instructions",
+      "sc.scheme_name"
+    )
+    .where("sc.scheme_id", scheme_id)
+    .orderBy("st.step_number");
+
+    console.log(flatResult);
+
   // EXERCISE C
   /*
     1C- Build a query in Knex that returns the following data.
